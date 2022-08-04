@@ -1,7 +1,7 @@
 public class Playlists {
     Playlist[] playlists = new Playlist[10];
 
-    public void CreatePlaylist() {
+    public void createPlaylist() {
         String playlistName = "My playlist";
         Song[] playlistSongs = new Song[10];
 
@@ -9,14 +9,14 @@ public class Playlists {
         playlist.name = playlistName;
         playlist.songs = playlistSongs;
 
-        int emptyPosition = Utilities.FindEmptyPosition(playlists);
+        int emptyPosition = Utilities.findEmptyPosition(playlists);
         if (emptyPosition == -1) {
-            int newLength = playlists.length + 10; playlists = (Playlist[]) Utilities.CopyArray(playlists, newLength);
+            int newLength = playlists.length + 10; playlists = (Playlist[]) Utilities.copyArray(playlists, newLength);
         }
         playlists[emptyPosition] = playlist;
     }
 
-    public void RemoveSong() {
+    public void removeSong() {
         String title = "Sweet Child O' Mine";
         for (int i = 0; i < playlists.length; i++) {
             if (playlists[i].name.equals(title)) {

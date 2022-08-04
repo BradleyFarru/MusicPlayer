@@ -1,7 +1,7 @@
 public class Songs {
     Song[] songs = new Song[10];
 
-    public void UploadSong() {
+    public void uploadSong() {
         String songTitle = "Sweet Child O' Mine";
         String songArtist = "Guns N' Roses";
         String songAlbum = "Appetite for Destruction";
@@ -12,17 +12,17 @@ public class Songs {
         song.artist = songArtist;
         song.length = songLength;
 
-        int emptyPosition = Utilities.FindEmptyPosition(songs);
+        int emptyPosition = Utilities.findEmptyPosition(songs);
 
         if (emptyPosition == -1) {
             int newLength = songs.length + 10;
-            songs = (Song[]) Utilities.CopyArray(songs, newLength);
+            songs = (Song[]) Utilities.copyArray(songs, newLength);
         }
 
         songs[emptyPosition] = song;
     }
 
-    public void RemoveSong(String givenTitle) {
+    public void removeSong(String givenTitle) {
         for (int i = 0; i < songs.length; i++) {
             if (songs[i].title.equals(givenTitle)) {
                 songs[i] = null;

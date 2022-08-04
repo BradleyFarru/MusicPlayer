@@ -1,7 +1,7 @@
 public class AccountManagement {
     Account[] accounts = new Account[10];
 
-    public void CreateAccount() {
+    public void createAccount() {
         String username = "Me";
         String password = "password";
 
@@ -10,7 +10,7 @@ public class AccountManagement {
         account.password = password;
     }
 
-    public void RemoveAccount(String givenUsername) {
+    public void removeAccount(String givenUsername) {
         for (int i = 0; i < accounts.length; i++) {
             if (accounts[i].username.equals(givenUsername)) {
                 accounts[i] = null;

@@ -1,5 +1,5 @@
 public class Utilities {
-    public static Object[] CopyArray(Object[] objects, int newLength) {
+    public static Object[] copyArray(Object[] objects, int newLength) {
         Object[] arrayCopy = objects;
         objects = new Song[newLength];
         for (int i = 0; i < objects.length; i++) {
@@ -11,7 +11,7 @@ public class Utilities {
         return objects;
     }
 
-    public static int FindEmptyPosition(Object[] objects) {
+    public static int findEmptyPosition(Object[] objects) {
         for (int i = 0; i < objects.length; i++) {
             if (objects[i] == null) {
                 return i;

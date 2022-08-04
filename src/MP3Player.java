@@ -27,8 +27,22 @@ public class MP3Player {
                 System.out.println(e.getMessage());
             }
         }).start();
+    }
 
+    public void pause() {
+        try {
+            jlPlayer.wait();
+        } catch (Exception e) {
+            System.out.println("Cannot pause song!");
+        }
+    }
 
+    public void resume() {
+        try {
+            jlPlayer.notify();
+        } catch (Exception e) {
+            System.out.println("Cannot resume song!");
+        }
     }
 
     public void close() {
