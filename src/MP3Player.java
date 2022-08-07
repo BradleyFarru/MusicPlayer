@@ -1,10 +1,45 @@
 import javazoom.jl.player.Player;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.util.Scanner;
 
-public class MP3Player {
+public class MP3Player extends Thread {
     private final String mp3File;
     private Player jlPlayer;
+
+    boolean continuePlaying = false;
+
+    boolean opened = true;
+
+
+    Scanner sc = new Scanner(System.in);
+    String command;
+
+    public void Menu() {
+        while (opened) {
+            System.out.println("In menu");
+            command = sc.nextLine();
+
+            switch (command) {
+                case "play" -> {
+                    play();
+                }
+                case "pause" -> {
+                    pause();
+                }
+                case "resume" -> {
+                    sresume();
+                }
+                case "stop" -> {
+                    close();
+                    opened = false;
+                }
+                default -> {
+                    System.out.println("Command not recognised!");
+                }
+            }
+        }
+    }
 
     public MP3Player(String mp3File) {
         this.mp3File = mp3File;
@@ -20,28 +55,38 @@ public class MP3Player {
             System.out.println(e.getMessage());
         }
 
-        new Thread(() -> {
+    }
+
+    public void run() {
+        play();
+
             try {
-                jlPlayer.play();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+                while (true) {
+                    synchronized (this) {
+                        while (!continuePlaying)
+                            wait();
+
+
+                        jlPlayer.play();
+                        Menu();
+                    }
+                }
             }
-        }).start();
+
+            catch (Exception e) {
+                System.out.println(e);
+            }
     }
 
     public void pause() {
-        try {
-            jlPlayer.wait();
-        } catch (Exception e) {
-            System.out.println("Cannot pause song!");
-        }
+        continuePlaying = false;
     }
 
-    public void resume() {
+    public void sresume() {
         try {
             jlPlayer.notify();
         } catch (Exception e) {
-            System.out.println("Cannot resume song!");
+            System.out.println(e);
         }
     }
 
