@@ -1,5 +1,6 @@
 public class Songs {
-    Song[] songs = new Song[10];
+    static Song[] songs = new Song[10];
+
 
     public void uploadSong() {
         String songTitle = "Sweet Child O' Mine";

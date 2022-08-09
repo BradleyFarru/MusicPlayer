@@ -1,8 +1,12 @@
 public class Playlists {
-    Playlist[] playlists = new Playlist[10];
+    static Playlist[] playlists = new Playlist[10];
 
-    public void createPlaylist() {
-        String playlistName = "My playlist";
+    public static Playlist[] getPlaylists() {
+        return playlists;
+    }
+
+    public static Playlist createPlaylist(String name) {
+        String playlistName = name;
         Song[] playlistSongs = new Song[10];
 
         Playlist playlist = new Playlist();
@@ -14,12 +18,13 @@ public class Playlists {
             int newLength = playlists.length + 10; playlists = (Playlist[]) Utilities.copyArray(playlists, newLength);
         }
         playlists[emptyPosition] = playlist;
+
+        return playlist;
     }
 
-    public void removeSong() {
-        String title = "Sweet Child O' Mine";
+    public static void removePlaylist(String name) {
         for (int i = 0; i < playlists.length; i++) {
-            if (playlists[i].name.equals(title)) {
+            if (playlists[i].name.equals(name)) {
                 playlists[i] = null;
                 break;
             }
