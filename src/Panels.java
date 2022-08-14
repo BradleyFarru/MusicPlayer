@@ -235,50 +235,78 @@ public class Panels {
 
     public JPanel uploadSongPanel() {
         JPanel uploadSongPanel = new JPanel();
+        uploadSongPanel.setLayout(new BoxLayout(uploadSongPanel, BoxLayout.Y_AXIS));
 
        JButton uploadSongButton = new JButton();
        uploadSongButton.setText("Upload Song");
        uploadSongPanel.add(uploadSongButton);
 
-       AtomicReference<String> songFilePath = new AtomicReference<>("");
        AtomicBoolean songFilePathProvided = new AtomicBoolean(false);
 
+       AtomicBoolean submitted = new AtomicBoolean(false);
+
+        JLabel songTitleLabel = new JLabel();
+        JTextArea songTitleField = new JTextArea(1, 15);
+        JLabel songArtistLabel = new JLabel();
+        JTextArea songArtistField = new JTextArea(1, 15);
+        JButton changePathButton = new JButton();
+        JLabel currentPathLabel = new JLabel();
+        JButton submitButton = new JButton();
+        JLabel errorField = new JLabel();
+        JFileChooser songFileChooser = new JFileChooser();
+
         uploadSongButton.addActionListener(e -> {
-            JFileChooser songFile = new JFileChooser();
-            uploadSongPanel.add(songFile);
-            int result = songFile.showOpenDialog(null);
-            songFile.addChoosableFileFilter(new FileNameExtensionFilter("MP3 FILE","mp3"));
+            uploadSongPanel.add(songFileChooser);
+            int result = songFileChooser.showOpenDialog(null);
+            songFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("MP3 FILE","mp3"));
 
             if (result == JFileChooser.APPROVE_OPTION) {
-                songFilePath.set(songFile.getSelectedFile().getPath());
                 songFilePathProvided.set(true);
-                songFile.setDialogTitle("Open mp3");
+                songTitleField.setText("");
+                songArtistField.setText("");
+                uploadSongButton.setVisible(false);
             }
 
-            JLabel songTitleLabel = new JLabel();
+            changePathButton.setText("Change song path");
+            uploadSongPanel.add(changePathButton);
+
+            changePathButton.addActionListener(e1 -> {
+                int newResult = songFileChooser.showOpenDialog(null);
+                songFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("MP3 FILE","mp3"));
+
+                if (newResult == JFileChooser.APPROVE_OPTION) {
+                    songFilePathProvided.set(true);
+                }
+            });
+
+            uploadSongPanel.add(currentPathLabel);
+            currentPathLabel.setText(songFileChooser.getSelectedFile().getName());
+
             songTitleLabel.setText("Name");
-            JTextArea songTitleField = new JTextArea(1, 15);
             songTitleField.setBackground(Color.white);
             songTitleField.getDocument().putProperty("filterNewlines", Boolean.TRUE);
             uploadSongPanel.add(songTitleLabel);
             uploadSongPanel.add(songTitleField);
 
-            JLabel songArtistLabel = new JLabel();
             songArtistLabel.setText("Artist");
-            JTextArea songArtistField = new JTextArea(1, 15);
             songArtistField.setBackground(Color.white);
             songArtistField.getDocument().putProperty("filterNewlines", Boolean.TRUE);
             uploadSongPanel.add(songArtistLabel);
             uploadSongPanel.add(songArtistField);
 
-            JButton submitButton = new JButton();
             submitButton.setText("Submit");
             uploadSongPanel.add(submitButton);
 
-            JLabel errorField = new JLabel();
             errorField.setText("Please fill out all fields!");
             errorField.setVisible(false);
             uploadSongPanel.add(errorField);
+
+            songTitleField.setVisible(true);
+            songTitleLabel.setVisible(true);
+            songArtistLabel.setVisible(true);
+            songArtistField.setVisible(true);
+            submitButton.setVisible(true);
+            changePathButton.setVisible(true);
 
             songTitleField.addKeyListener(new KeyListener() {
                 @Override
@@ -318,7 +346,7 @@ public class Panels {
                 String songTitleValue = songTitleField.getText();
                 String songArtistValue = songArtistField.getText();
                if (!songTitleValue.equals("") && !songArtistValue.equals("") && songFilePathProvided.get()) {
-                   Songs.uploadSong(songTitleValue, songArtistValue, songFilePath.get());
+                   Songs.uploadSong(songTitleValue, songArtistValue, songFileChooser.getSelectedFile().getPath());
                    songArtistLabel.setVisible(false);
                    songArtistField.setText("");
                    songArtistField.setVisible(false);
@@ -326,8 +354,14 @@ public class Panels {
                    songTitleField.setText("");
                    songTitleLabel.setVisible(false);
                    submitButton.setVisible(false);
+                   changePathButton.setVisible(false);
+                   errorField.setVisible(false);
+                   uploadSongButton.setVisible(true);
+                   submitted.set(true);
                } else {
-                    errorField.setVisible(true);
+                   if (!submitted.get()) {
+                       errorField.setVisible(true);
+                   }
                }
             });
         });
