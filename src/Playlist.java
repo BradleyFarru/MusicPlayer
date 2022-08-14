@@ -11,9 +11,11 @@ public class Playlist {
         }
 
         for (Song songInSongs : Songs.songs) {
-            if (songInSongs.equals(providedSong)) {
-                song = songInSongs;
-                break;
+            if (songInSongs != null) {
+                if (songInSongs.equals(providedSong)) {
+                    song = songInSongs;
+                    break;
+                }
             }
         }
 

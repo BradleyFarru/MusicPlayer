@@ -11,6 +11,7 @@ public class Display extends JFrame {
         JPanel parentPanel = new JPanel();
         parentPanel.add(panels.mainPanel("/Users/bradleyfarrugia/IdeaProjects/MusicPlayer/src/Icon.png", "Title", 100));
         parentPanel.add(panels.playlistsPanel());
+        parentPanel.add(panels.uploadSongPanel());
         frame.add(parentPanel);
         frame.setVisible(true);
     }

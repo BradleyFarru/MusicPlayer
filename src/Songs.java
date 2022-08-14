@@ -2,13 +2,11 @@ public class Songs {
     static Song[] songs = new Song[10];
 
 
-    public void uploadSong() {
-        String songTitle = "Sweet Child O' Mine";
-        String songArtist = "Guns N' Roses";
-        String songAlbum = "Appetite for Destruction";
+    public static void uploadSong(String songTitle, String songArtist, String songPath) {
         int songLength = 5;
 
         Song song = new Song();
+        song.filePath = songPath;
         song.title = songTitle;
         song.artist = songArtist;
         song.length = songLength;
@@ -23,7 +21,7 @@ public class Songs {
         songs[emptyPosition] = song;
     }
 
-    public void removeSong(String givenTitle) {
+    public static void removeSong(String givenTitle) {
         for (int i = 0; i < songs.length; i++) {
             if (songs[i].title.equals(givenTitle)) {
                 songs[i] = null;
