@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Panels {
     public JPanel mainPanel(String iconAddress, String title, int duration) {
@@ -97,7 +96,6 @@ public class Panels {
     public JPanel playlistsPanel() {
         JPanel playlistsPanel = new JPanel();
         playlistsPanel.setLayout(new FlowLayout());
-        playlistsPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         playlistsPanel.setSize(1000, 1000);
 
         JButton newPlaylistBtn = new JButton();
@@ -151,10 +149,9 @@ public class Panels {
                             }
 
                             JPanel thisPlaylistPanel = playlistPanel(playlist);
-                            thisPlaylistPanel.setLayout(new FlowLayout());
-                            thisPlaylistPanel.setBorder(BorderFactory.createLineBorder(Color.black, 50));
                             playlistsPanel.putClientProperty("playlist panel", thisPlaylistPanel);
                             playlistsPanel.add(thisPlaylistPanel);
+                            thisPlaylistPanel.setVisible(true);
                         } else {
                             JComponent currentPlaylistPanel = (JComponent) playlistsPanel.getClientProperty("playlist panel");
                             playlistsPanel.remove(currentPlaylistPanel);
@@ -184,12 +181,15 @@ public class Panels {
                                 playlistsPanel.remove(currentPlaylistPanel);
                             }
 
-                            playlistsPanel.add(playlistsPanel.add(playlistPanel(newPlaylist)));
+                            JPanel thisPlaylistPanel = playlistPanel(newPlaylist);
+                            playlistsPanel.add(thisPlaylistPanel);
+                            thisPlaylistPanel.setVisible(true);
                             playlistsPanel.putClientProperty("playlist panel", playlistsPanel);
                             isShowingPanel.set(true);
                         } else {
                             JComponent currentPlaylistPanel = (JComponent) playlistsPanel.getClientProperty("playlist panel");
                             playlistsPanel.remove(currentPlaylistPanel);
+                            isShowingPanel.set(false);
                         }
                     });
 
@@ -211,31 +211,28 @@ public class Panels {
         JPanel playlistPanel = new JPanel();
         playlistPanel.setLayout(new FlowLayout());
 
-        JButton addSongToPlaylist = new JButton();
-        addSongToPlaylist.setText("Add a song");
+        JButton addSongToPlaylistBtn = new JButton();
+        addSongToPlaylistBtn.setText("Add a song");
+        playlistPanel.add(addSongToPlaylistBtn);
+        addSongToPlaylistBtn.setVisible(true);
 
-        for (Song song : playlist.songs) {
-            if (song != null) {
-                JButton songButton = createSongButton(song);
-                playlistPanel.add(songButton);
-            }
-        }
+        JPanel thisSearchForSongPanel = searchForSongPanel(playlist);
+        playlistPanel.add(thisSearchForSongPanel);
+        thisSearchForSongPanel.setVisible(false);
+
+        addSongToPlaylistBtn.addActionListener(e -> thisSearchForSongPanel.setVisible(true));
 
         return playlistPanel;
-    }
-
-    public JButton createSongButton(Song song) {
-        JButton songButton = new JButton();
-        songButton.setText(song.title);
-
-        songButton.addActionListener(e -> songButton.setText("Playing!"));
-
-        return songButton;
     }
 
     public JPanel uploadSongPanel() {
         JPanel uploadSongPanel = new JPanel();
         uploadSongPanel.setLayout(new BoxLayout(uploadSongPanel, BoxLayout.Y_AXIS));
+
+        JLabel wrongExtensionField = new JLabel();
+        wrongExtensionField.setText("MP3 type file only supported!");
+        wrongExtensionField.setVisible(false);
+        uploadSongPanel.add(wrongExtensionField);
 
        JButton uploadSongButton = new JButton();
        uploadSongButton.setText("Upload Song");
@@ -258,13 +255,19 @@ public class Panels {
         uploadSongButton.addActionListener(e -> {
             uploadSongPanel.add(songFileChooser);
             int result = songFileChooser.showOpenDialog(null);
-            songFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("MP3 FILE","mp3"));
+            songFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("MP3 FILE", "mp3"));
 
             if (result == JFileChooser.APPROVE_OPTION) {
-                songFilePathProvided.set(true);
-                songTitleField.setText("");
-                songArtistField.setText("");
-                uploadSongButton.setVisible(false);
+                if (songFileChooser.getSelectedFile().getPath().endsWith(".mp3")) {
+
+                    wrongExtensionField.setVisible(false);
+                    songFilePathProvided.set(true);
+                    songTitleField.setText("");
+                    songArtistField.setText("");
+                    uploadSongButton.setVisible(false);
+                } else {
+                    wrongExtensionField.setVisible(true);
+                }
             }
 
             changePathButton.setText("Change song path");
@@ -272,101 +275,173 @@ public class Panels {
 
             changePathButton.addActionListener(e1 -> {
                 int newResult = songFileChooser.showOpenDialog(null);
-                songFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("MP3 FILE","mp3"));
+                songFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("MP3 FILE", "mp3"));
 
                 if (newResult == JFileChooser.APPROVE_OPTION) {
-                    songFilePathProvided.set(true);
+                    if (songFileChooser.getSelectedFile().getPath().endsWith(".mp3")) {
+                        wrongExtensionField.setVisible(false);
+                        songFilePathProvided.set(true);
+                    } else {
+                        wrongExtensionField.setVisible(true);
+                    }
                 }
             });
 
-            uploadSongPanel.add(currentPathLabel);
-            currentPathLabel.setText(songFileChooser.getSelectedFile().getName());
+            if (songFilePathProvided.get()) {
+                uploadSongPanel.add(currentPathLabel);
+                currentPathLabel.setText(songFileChooser.getSelectedFile().getName());
 
-            songTitleLabel.setText("Name");
-            songTitleField.setBackground(Color.white);
-            songTitleField.getDocument().putProperty("filterNewlines", Boolean.TRUE);
-            uploadSongPanel.add(songTitleLabel);
-            uploadSongPanel.add(songTitleField);
+                songTitleLabel.setText("Name");
+                songTitleField.setBackground(Color.white);
+                songTitleField.getDocument().putProperty("filterNewlines", Boolean.TRUE);
+                uploadSongPanel.add(songTitleLabel);
+                uploadSongPanel.add(songTitleField);
 
-            songArtistLabel.setText("Artist");
-            songArtistField.setBackground(Color.white);
-            songArtistField.getDocument().putProperty("filterNewlines", Boolean.TRUE);
-            uploadSongPanel.add(songArtistLabel);
-            uploadSongPanel.add(songArtistField);
+                songArtistLabel.setText("Artist");
+                songArtistField.setBackground(Color.white);
+                songArtistField.getDocument().putProperty("filterNewlines", Boolean.TRUE);
+                uploadSongPanel.add(songArtistLabel);
+                uploadSongPanel.add(songArtistField);
 
-            submitButton.setText("Submit");
-            uploadSongPanel.add(submitButton);
+                submitButton.setText("Submit");
+                uploadSongPanel.add(submitButton);
 
-            errorField.setText("Please fill out all fields!");
-            errorField.setVisible(false);
-            uploadSongPanel.add(errorField);
+                errorField.setText("Please fill out all fields!");
+                errorField.setVisible(false);
+                uploadSongPanel.add(errorField);
 
-            songTitleField.setVisible(true);
-            songTitleLabel.setVisible(true);
-            songArtistLabel.setVisible(true);
-            songArtistField.setVisible(true);
-            submitButton.setVisible(true);
-            changePathButton.setVisible(true);
+                songTitleField.setVisible(true);
+                songTitleLabel.setVisible(true);
+                songArtistLabel.setVisible(true);
+                songArtistField.setVisible(true);
+                submitButton.setVisible(true);
+                changePathButton.setVisible(true);
 
-            songTitleField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-                    errorField.setVisible(false);
-                }
+                songTitleField.addKeyListener(new KeyListener() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        errorField.setVisible(false);
+                        wrongExtensionField.setVisible(false);
+                    }
 
-                @Override
-                public void keyPressed(KeyEvent e) {
+                    @Override
+                    public void keyPressed(KeyEvent e) {
 
-                }
+                    }
 
-                @Override
-                public void keyReleased(KeyEvent e) {
+                    @Override
+                    public void keyReleased(KeyEvent e) {
 
-                }
-            });
+                    }
+                });
 
-            songArtistField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-                    errorField.setVisible(false);
-                }
+                songArtistField.addKeyListener(new KeyListener() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        errorField.setVisible(false);
+                        wrongExtensionField.setVisible(false);
+                    }
 
-                @Override
-                public void keyPressed(KeyEvent e) {
+                    @Override
+                    public void keyPressed(KeyEvent e) {
 
-                }
+                    }
 
-                @Override
-                public void keyReleased(KeyEvent e) {
+                    @Override
+                    public void keyReleased(KeyEvent e) {
 
-                }
-            });
+                    }
+                });
 
-            submitButton.addActionListener(e2 -> {
-                String songTitleValue = songTitleField.getText();
-                String songArtistValue = songArtistField.getText();
-               if (!songTitleValue.equals("") && !songArtistValue.equals("") && songFilePathProvided.get()) {
-                   Songs.uploadSong(songTitleValue, songArtistValue, songFileChooser.getSelectedFile().getPath());
-                   songArtistLabel.setVisible(false);
-                   songArtistField.setText("");
-                   songArtistField.setVisible(false);
-                   songTitleField.setVisible(false);
-                   songTitleField.setText("");
-                   songTitleLabel.setVisible(false);
-                   submitButton.setVisible(false);
-                   changePathButton.setVisible(false);
-                   errorField.setVisible(false);
-                   uploadSongButton.setVisible(true);
-                   submitted.set(true);
-               } else {
-                   if (!submitted.get()) {
-                       errorField.setVisible(true);
-                   }
-               }
-            });
+                submitButton.addActionListener(e2 -> {
+                    String songTitleValue = songTitleField.getText();
+                    String songArtistValue = songArtistField.getText();
+                    if (!songTitleValue.equals("") && !songArtistValue.equals("") && songFilePathProvided.get()) {
+                        Songs.uploadSong(songTitleValue, songArtistValue, songFileChooser.getSelectedFile().getPath());
+                        songArtistLabel.setVisible(false);
+                        songArtistField.setText("");
+                        songArtistField.setVisible(false);
+                        songTitleField.setVisible(false);
+                        songTitleField.setText("");
+                        songTitleLabel.setVisible(false);
+                        submitButton.setVisible(false);
+                        changePathButton.setVisible(false);
+                        errorField.setVisible(false);
+                        currentPathLabel.setVisible(false);
+                        uploadSongButton.setVisible(true);
+                        submitted.set(true);
+                    } else {
+                        if (!submitted.get()) {
+                            errorField.setVisible(true);
+                        }
+                    }
+                });
+            }
         });
 
         return uploadSongPanel;
     }
 
+    public JPanel searchForSongPanel(Playlist playlist) {
+       JPanel searchForSongPanel = new JPanel();
+       searchForSongPanel.setLayout(new BoxLayout(searchForSongPanel, BoxLayout.Y_AXIS));
+
+        JTextArea providedSongTitleField = new JTextArea(1, 15);
+        searchForSongPanel.add(providedSongTitleField);
+        providedSongTitleField.setVisible(true);
+
+        JPanel listOfFoundSongs = new JPanel();
+        searchForSongPanel.add(listOfFoundSongs);
+
+        Song[] arrayOfFoundSongs = new Song[playlist.songs.length];
+
+        providedSongTitleField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                String currentTypedText = providedSongTitleField.getText();
+                if (!currentTypedText.isEmpty()) {
+                    for (Song song : Songs.songs) {
+                    boolean isInArray = false;
+
+                    if (song != null) {
+                            if (song.title.contains(currentTypedText)) {
+                                for (Song song1 : arrayOfFoundSongs) {
+                                    if (song.equals(song1)) {
+                                        isInArray = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!isInArray) {
+                                    JButton songButton = new JButton();
+                                    listOfFoundSongs.putClientProperty(song, song.title);
+
+                                    songButton.setVisible(true);
+                                    songButton.setText(song.title);
+
+                                    songButton.addActionListener(e1 -> playlist.addSong(song));
+
+                                    int emptyPosition = Utilities.findEmptyPosition(arrayOfFoundSongs);
+                                    arrayOfFoundSongs[emptyPosition] = song;
+                                    listOfFoundSongs.add(songButton);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+
+       return searchForSongPanel;
+    }
 }
