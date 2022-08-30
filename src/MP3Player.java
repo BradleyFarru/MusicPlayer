@@ -1,11 +1,11 @@
-import javazoom.jl.player.Player;
+//import javazoom.jl.player.Player;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.util.Scanner;
 
 public class MP3Player extends Thread {
     private final String mp3File;
-    private Player jlPlayer;
+    //private Player jlPlayer;
 
     boolean continuePlaying = false;
 
@@ -49,7 +49,7 @@ public class MP3Player extends Thread {
         try {
             FileInputStream fileInputStream = new FileInputStream(mp3File);
             BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-            jlPlayer = new Player(bufferedInputStream);
+            //jlPlayer = new Player(bufferedInputStream);
         } catch (Exception e) {
             System.out.println("Problem playing mp3 file " + mp3File);
             System.out.println(e.getMessage());
@@ -67,7 +67,7 @@ public class MP3Player extends Thread {
                             wait();
 
 
-                        jlPlayer.play();
+                        //jlPlayer.play();
                         Menu();
                     }
                 }
@@ -84,13 +84,13 @@ public class MP3Player extends Thread {
 
     public void sresume() {
         try {
-            jlPlayer.notify();
+            //jlPlayer.notify();
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
     public void close() {
-        if (jlPlayer != null) jlPlayer.close();
+        //if (jlPlayer != null) jlPlayer.close();
     }
 }

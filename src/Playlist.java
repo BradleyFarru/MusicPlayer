@@ -1,8 +1,10 @@
-public class Playlist {
+import java.io.Serializable;
+
+public class Playlist implements Serializable {
     String name;
     Song[] songs;
 
-    public Song addSong (Song providedSong) {
+    public void addSong (Song providedSong) {
         Song song = new Song();
 
         int emptyPosition = Utilities.findEmptyPosition(songs);
@@ -20,12 +22,12 @@ public class Playlist {
         }
 
         if (song.title == null) {
-            return null;
+            return;
         }
 
         songs[emptyPosition] = song;
 
-        return song;
+        FileManager.saveFile("null", this, providedSong);
     }
     public void removeSong(String title) {
         for (int i = 0; i < songs.length; i++) {
@@ -38,9 +40,5 @@ public class Playlist {
 
     public String getName() {
         return name;
-    }
-
-    public Song[] getSongs() {
-        return songs;
     }
 }
