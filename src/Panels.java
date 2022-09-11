@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Panels {
@@ -152,23 +153,26 @@ public class Panels {
                     playlistButton.setText(playlist.getName());
                     playlistsPanel.add(playlistButton);
 
-                    AtomicBoolean isShowingPanel = new AtomicBoolean(false);
 
                     playlistButton.addActionListener(e -> {
-                        if (!isShowingPanel.get()) {
-                            JComponent currentPlaylistPanel = (JComponent) playlistsPanel.getClientProperty("playlist panel");
-                            if (currentPlaylistPanel != null) {
-                                playlistsPanel.remove(currentPlaylistPanel);
-                            }
-
-                            JPanel thisPlaylistPanel = playlistPanel(playlist);
-                            playlistsPanel.putClientProperty("playlist panel", thisPlaylistPanel);
-                            playlistsPanel.add(thisPlaylistPanel);
-                            thisPlaylistPanel.setVisible(true);
-                        } else {
-                            JComponent currentPlaylistPanel = (JComponent) playlistsPanel.getClientProperty("playlist panel");
-                            playlistsPanel.remove(currentPlaylistPanel);
+                        JPanel playlistPanel = playlistPanel(playlist);
+                        playlistPanel.setName(playlist.name);
+                        boolean containsPlaylistPanel = false;
+                        for (Component component : playlistsPanel.getComponents()) {
+                            if (component.getName() == null) continue;
+                            containsPlaylistPanel = true;
+                            break;
                         }
+
+                        if (containsPlaylistPanel) {
+                            if (!playlistsPanel.getComponent(5).getName().equals(playlist.name)) {
+                                playlistsPanel.add(playlistPanel);
+                            }
+                            playlistsPanel.remove(playlistsPanel.getComponent(5));
+                        } else {
+                            playlistsPanel.add(playlistPanel);
+                        }
+
                     });
                 }
             }
@@ -219,9 +223,24 @@ public class Panels {
     public JPanel playlistPanel(Playlist playlist) {
         JPanel playlistPanel = new JPanel();
         playlistPanel.setLayout(new FlowLayout());
+        ArrayList<Song> songsNotInPlaylist = new ArrayList<>();
+        for (Song song : Songs.songs) {
+            for (Song song1 : playlist.songs) {
+                if (song1 == null || song == null) { continue; }
+                if (!song.equals(song1)) {
+                    if (!songsNotInPlaylist.contains(song)) {
+                        songsNotInPlaylist.add(song);
+                    }
+                }
+            }
+        }
 
-        playlistPanel.add(manageSongsButton(playlistPanel, playlist, ShowSongsType.ADDSONGTOPLAYLIST, Songs.songs));
-        playlistPanel.add(manageSongsButton(playlistPanel, playlist, ShowSongsType.REMOVESONGFROMPLAYLIST, playlist.songs));
+        Song[] songsNotInPlaylistArray = songsNotInPlaylist.toArray(new Song[0]);
+
+        JButton addSongToPlaylistBtn = manageSongsButton(playlistPanel, playlist, ShowSongsType.ADDSONGTOPLAYLIST, songsNotInPlaylistArray);
+        JButton removeSongFromPlaylistBtn = manageSongsButton(playlistPanel, playlist, ShowSongsType.REMOVESONGFROMPLAYLIST, playlist.songs);
+        playlistPanel.add(addSongToPlaylistBtn);
+        playlistPanel.add(removeSongFromPlaylistBtn);
 
         return playlistPanel;
     }
@@ -419,7 +438,7 @@ public class Panels {
 
         AtomicBoolean showingSongs = new AtomicBoolean(false);
         JPanel songsShowingPanel = showSongs(songsShowing, emptyPosition, ShowSongsType.REMOVESONG, null, Songs.songs);
-        removeSongButton.add(songsShowingPanel);
+        removeSongPanel.add(songsShowingPanel);
         songsShowingPanel.setVisible(false);
 
         removeSongButton.addActionListener(e -> {
@@ -532,7 +551,7 @@ public class Panels {
 
         AtomicBoolean showingSongs = new AtomicBoolean(false);
         JPanel songsShowingPanel = showSongs(songsShowing, emptyPosition, showSongsType, playlist, songs);
-        manageSongsButton.add(songsShowingPanel);
+        panel.add(songsShowingPanel);
         songsShowingPanel.setVisible(false);
 
         manageSongsButton.addActionListener(e -> {
