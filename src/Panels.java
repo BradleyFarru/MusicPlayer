@@ -10,7 +10,8 @@ public class Panels {
     enum ShowSongsType {
         PLAYSONG,
         ADDSONGTOPLAYLIST,
-        REMOVESONG
+        REMOVESONG,
+        REMOVESONGFROMPLAYLIST
     }
 
     public JPanel mainPanel(String iconAddress, String title, int duration) {
@@ -212,8 +213,6 @@ public class Panels {
             }
         });
 
-
-
         return playlistsPanel;
     }
 
@@ -221,29 +220,8 @@ public class Panels {
         JPanel playlistPanel = new JPanel();
         playlistPanel.setLayout(new FlowLayout());
 
-        JButton addSongToPlaylistBtn = new JButton();
-        addSongToPlaylistBtn.setText("Add a song");
-        playlistPanel.add(addSongToPlaylistBtn);
-
-        final Song[][] songsShowing = {new Song[Songs.songs.length]};
-
-        int emptyPosition = Utilities.findEmptyPosition(songsShowing[0]);
-        if (emptyPosition == -1) {
-            int newLength = songsShowing[0].length + 10;
-            songsShowing[0] = (Song[]) Utilities.copyArray(songsShowing[0], newLength);
-        }
-
-        AtomicBoolean showingSongs = new AtomicBoolean(false);
-        JPanel songsShowingPanel = showSongs(songsShowing, emptyPosition, ShowSongsType.ADDSONGTOPLAYLIST, playlist);
-        addSongToPlaylistBtn.add(songsShowingPanel);
-        songsShowingPanel.setVisible(false);
-
-        addSongToPlaylistBtn.addActionListener(e -> {
-            songsShowingPanel.setVisible(!showingSongs.get());
-            songsShowingPanel.removeAll();
-            songsShowingPanel.add(showSongs(songsShowing, emptyPosition, ShowSongsType.ADDSONGTOPLAYLIST, playlist));
-            showingSongs.set(!showingSongs.get());
-        });
+        playlistPanel.add(manageSongsButton(playlistPanel, playlist, ShowSongsType.ADDSONGTOPLAYLIST, Songs.songs));
+        playlistPanel.add(manageSongsButton(playlistPanel, playlist, ShowSongsType.REMOVESONGFROMPLAYLIST, playlist.songs));
 
         return playlistPanel;
     }
@@ -440,14 +418,14 @@ public class Panels {
         }
 
         AtomicBoolean showingSongs = new AtomicBoolean(false);
-        JPanel songsShowingPanel = showSongs(songsShowing, emptyPosition, ShowSongsType.REMOVESONG, null);
+        JPanel songsShowingPanel = showSongs(songsShowing, emptyPosition, ShowSongsType.REMOVESONG, null, Songs.songs);
         removeSongButton.add(songsShowingPanel);
         songsShowingPanel.setVisible(false);
 
         removeSongButton.addActionListener(e -> {
             songsShowingPanel.setVisible(!showingSongs.get());
             songsShowingPanel.removeAll();
-            songsShowingPanel.add(showSongs(songsShowing, emptyPosition, ShowSongsType.REMOVESONG, null));
+            songsShowingPanel.add(showSongs(songsShowing, emptyPosition, ShowSongsType.REMOVESONG, null, Songs.songs));
             showingSongs.set(!showingSongs.get());
         });
 
@@ -471,46 +449,44 @@ public class Panels {
         }
 
         AtomicBoolean showingSongs = new AtomicBoolean(false);
-        JPanel songsShowingPanel = showSongs(songsShowing, emptyPosition, ShowSongsType.PLAYSONG, null);
+        JPanel songsShowingPanel = showSongs(songsShowing, emptyPosition, ShowSongsType.PLAYSONG, null, Songs.songs);
         showSongsPanel.add(songsShowingPanel);
         songsShowingPanel.setVisible(false);
 
         showSongsBtn.addActionListener(e -> {
             songsShowingPanel.setVisible(!showingSongs.get());
             songsShowingPanel.removeAll();
-            songsShowingPanel.add(showSongs(songsShowing, emptyPosition, ShowSongsType.PLAYSONG, null));
+            songsShowingPanel.add(showSongs(songsShowing, emptyPosition, ShowSongsType.PLAYSONG, null, Songs.songs));
             showingSongs.set(!showingSongs.get());
         });
+
 
         return showSongsPanel;
     }
 
-    public JPanel showSongs(Song[][] songsShowing, int emptyPosition, ShowSongsType showSongsType, Playlist playlist) {
+    public JPanel showSongs(Song[][] songsShowing, int emptyPosition, ShowSongsType showSongsType, Playlist playlist, Song[] songs) {
         JPanel songsPanel = new JPanel();
         songsPanel.setLayout(new FlowLayout());
-        boolean songShowed = false;
-        for (Song song : Songs.songs) {
+        for (Song song : songs) {
             if (song == null) continue;
             for (Song songShowing : songsShowing[0]) {
                 if (songShowing == null) continue;
                 if (songShowing.equals(song)) {
-                    songShowed = true;
                     break;
                 }
             }
 
-            if (songShowed) { continue; }
 
             JButton songBtn = new JButton();
             songBtn.setText(song.title);
             songBtn.setVisible(true);
-
 
             songsShowing[0][emptyPosition] = song;
             songsPanel.add(songBtn);
             songBtn.setVisible(true);
 
             songBtn.addActionListener(e1 -> {
+                boolean playlistHasSong = false;
                 if (showSongsType == ShowSongsType.REMOVESONG) {
                     Songs.removeSong(songBtn.getText());
                     songsPanel.remove(songBtn);
@@ -518,11 +494,54 @@ public class Panels {
                     //play song
                 } else if (showSongsType == ShowSongsType.ADDSONGTOPLAYLIST) {
                     if (playlist != null) {
-                       playlist.addSong(song);
+                        for (Song song1 : playlist.songs) {
+                            if (song1 == null) continue;
+                            if (!song1.equals(song)) {
+                                playlistHasSong = true;
+                                break;
+                            }
+                        }
+                        if (!playlistHasSong) {
+                            playlist.addSong(song);
+                        }
                     }
+                } else if (showSongsType == ShowSongsType.REMOVESONGFROMPLAYLIST) {
+                    playlist.removeSong(song);
                 }
             });
         }
         return songsPanel;
+    }
+
+    JButton manageSongsButton(JPanel panel, Playlist playlist, ShowSongsType showSongsType, Song[] songs) {
+        JButton manageSongsButton = new JButton();
+        if (showSongsType.equals(ShowSongsType.ADDSONGTOPLAYLIST)) {
+            manageSongsButton.setText("Add a song");
+        } else if (showSongsType.equals(ShowSongsType.REMOVESONGFROMPLAYLIST)) {
+            manageSongsButton.setText("Remove a song");
+        }
+        panel.add(manageSongsButton);
+
+        final Song[][] songsShowing = {new Song[Songs.songs.length]};
+
+        int emptyPosition = Utilities.findEmptyPosition(songsShowing[0]);
+        if (emptyPosition == -1) {
+            int newLength = songsShowing[0].length + 10;
+            songsShowing[0] = (Song[]) Utilities.copyArray(songsShowing[0], newLength);
+        }
+
+        AtomicBoolean showingSongs = new AtomicBoolean(false);
+        JPanel songsShowingPanel = showSongs(songsShowing, emptyPosition, showSongsType, playlist, songs);
+        manageSongsButton.add(songsShowingPanel);
+        songsShowingPanel.setVisible(false);
+
+        manageSongsButton.addActionListener(e -> {
+            songsShowingPanel.setVisible(!showingSongs.get());
+            songsShowingPanel.removeAll();
+            songsShowingPanel.add(showSongs(songsShowing, emptyPosition, showSongsType, playlist, songs));
+            showingSongs.set(!showingSongs.get());
+        });
+
+        return manageSongsButton;
     }
 }

@@ -1,6 +1,7 @@
 import java.io.Serializable;
 
 public class Playlist implements Serializable {
+    private static final long serialVersionUID = 6529685098267757690L;
     String name;
     Song[] songs;
 
@@ -29,9 +30,10 @@ public class Playlist implements Serializable {
 
         FileManager.saveFile("null", this, providedSong);
     }
-    public void removeSong(String title) {
+    public void removeSong(Song song) {
         for (int i = 0; i < songs.length; i++) {
-            if (songs[i].title.equals(title)) {
+            if (songs[i] == null) continue;
+            if (songs[i].equals(song)) {
                 songs[i] = null;
                 break;
             }

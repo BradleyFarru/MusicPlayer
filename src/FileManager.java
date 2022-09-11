@@ -161,7 +161,6 @@ public class FileManager implements Serializable {
 
     public static void removeFile(String filePath) {
         try {
-
             Path path = Paths.get(System.getProperty("user.dir") + filePath);
             Files.delete(path);
         } catch (IOException e) {

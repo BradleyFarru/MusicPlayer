@@ -3,8 +3,8 @@ import javax.swing.*;
 public class Display extends JFrame {
 
     public static void main(String[] args) {
-        FileManager.loadSavedFiles(FileManager.ObjectType.PLAYLIST);
         FileManager.loadSavedFiles(FileManager.ObjectType.SONG);
+        FileManager.loadSavedFiles(FileManager.ObjectType.PLAYLIST);
 
         Frame frame = new Frame();
         Panels panels = new Panels();

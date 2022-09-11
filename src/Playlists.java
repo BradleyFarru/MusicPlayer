@@ -10,6 +10,7 @@ public class Playlists implements java.io.Serializable {
 
         if (songTitles != null) {
             for (String songTitle : songTitles) {
+                if (songTitle == null) { continue; }
                 for (Song song : Songs.songs) {
                     if (song == null) { continue; }
                     if (songTitle.equals(song.title)) {
